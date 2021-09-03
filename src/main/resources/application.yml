@@ -1,0 +1,8 @@
+properties:
+  url: https://openexchangerates.org/api/
+  endpointCurrencies: currencies
+  endpointLatest: latest
+  endpointHistory: 1999-01-01
+  appId: c3adc7ab6704420e99804954ca051375
+  base: USD
+  symbol:
