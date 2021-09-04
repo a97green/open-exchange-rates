@@ -1,8 +1,13 @@
-properties:
-  url: https://openexchangerates.org/api/
-  endpointCurrencies: currencies
-  endpointLatest: latest
-  endpointHistory: 1999-01-01
-  appId: c3adc7ab6704420e99804954ca051375
-  base: USD
-  symbol:
+client-properties:
+  url: https://openexchangerates.org/api/ # адрес курсов валют
+  endpointCurrencies: currencies # конечная точка со списком названий всех валют
+  endpointLatest: latest # конечная точка с актуальными данными курсов
+  endpointHistory: 1999-01-01 # конечная точка с данными по указаной дате
+  appId: c3adc7ab6704420e99804954ca051375 # идентификатор подключения к openexchangerates
+  base: USD # сокращённое название базовой валюты
+  symbol: # сокращённое название валют сортировки
+  urlGif: https://api.giphy.com/v1/gifs/random # адрес гифок
+  apiKey: DGilNBDTObJK8AbMlgIG9fidA07eToRS # ключ для подключеня к giphy
+  tagMore: rich # тег поиска гиф при повышении курса
+  tagLess: broke # тег поиска гиф при понижении курса
+  rating: # тип поиска(g, p, gp13)

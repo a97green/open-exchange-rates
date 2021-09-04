@@ -2,13 +2,12 @@ package ru.aGreen.openexchangerates.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import ru.aGreen.openexchangerates.client.configuration.CurrenciesConfiguration;
 
-@FeignClient(name = "data", url = "NOT_USED", configuration = CurrenciesConfiguration.class)
+@FeignClient(name = "currencies", url = "Not", configuration = CurrenciesConfiguration.class)
 public interface CurrenciesClient {
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     ResponseEntity<String> getCurrenciesRates();
 
 }

@@ -3,12 +3,11 @@ package ru.aGreen.openexchangerates.client.configuration;
 import feign.RequestInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import ru.aGreen.openexchangerates.client.properties.ClientsProperties;
 
-@Configuration
 public class LatestConfiguration {
     @Autowired
-    private RatesProperties properties;
+    private ClientsProperties properties;
 
     @Bean
     public RequestInterceptor requestInterceptor() {

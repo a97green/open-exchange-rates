@@ -2,13 +2,12 @@ package ru.aGreen.openexchangerates.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import ru.aGreen.openexchangerates.client.configuration.HistoryConfiguration;
 
-@FeignClient(name = "date", url = "NOT_USED", configuration = HistoryConfiguration.class)
+@FeignClient(name = "history", url = "Not", configuration = HistoryConfiguration.class)
 public interface HistoryClient {
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     ResponseEntity<String> getHistoryRates();
 
 }

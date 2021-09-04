@@ -7,32 +7,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.aGreen.openexchangerates.client.CurrenciesClient;
-import ru.aGreen.openexchangerates.client.HistoryClient;
-import ru.aGreen.openexchangerates.client.LatestClient;
-import ru.aGreen.openexchangerates.client.configuration.RatesProperties;
-
+import ru.aGreen.openexchangerates.client.*;
+import ru.aGreen.openexchangerates.client.properties.ClientsProperties;
 
 import java.util.*;
-
+@RequestMapping
 @Controller
 public class MainController {
     @Autowired
-    private RatesProperties ratesProperties;
+    private ClientsProperties clientsProperties;
     @Autowired
-    private final CurrenciesClient currenciesClient;
+    private CurrenciesClient currenciesClient;
     @Autowired
-    private final HistoryClient historyClient;
+    private HistoryClient historyClient;
     @Autowired
-    private final LatestClient latestClient;
-
-
-    public MainController(CurrenciesClient currenciesClient, HistoryClient historyClient, LatestClient latestClient) {
-        this.currenciesClient = currenciesClient;
-        this.historyClient = historyClient;
-        this.latestClient = latestClient;
-    }
+    private LatestClient latestClient;
 
 
     @GetMapping(path = "/")
@@ -45,15 +36,14 @@ public class MainController {
             List<String> rateValues = new ArrayList<>();
             for (Object rate : jsonCurrencies.keySet()) {
                 rateKeys.add(rate.toString());
-
             }
             Collections.sort (rateKeys);
             for (String rate : rateKeys) {
                 rateValues.add(jsonCurrencies.get(rate).toString());
-
             }
             model.addAttribute("rate_keys", rateKeys);
             model.addAttribute("rate_values", rateValues);
+            model.addAttribute("title", "Курс обмена валют");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,10 +60,9 @@ public class MainController {
         String historyRatesResponse = historyClient.getHistoryRates().getBody();
         String latestRatesResponse = latestClient.getLatestRates().getBody();
 
-        System.out.println(ratesProperties.getHistoryUrl());
-        System.out.println(ratesProperties.getLatestUrl());
+        JSONParser parser = new JSONParser();
+
         try {
-            JSONParser parser = new JSONParser();
             JSONObject jsonHistoryRates = (JSONObject) parser.parse(historyRatesResponse);
             JSONObject jsonLatestRates = (JSONObject) parser.parse(latestRatesResponse);
 
@@ -85,27 +74,23 @@ public class MainController {
             double courseLatest = 0;
 
             for (Object currencyHistory : historyRate.keySet()) {
-                courseHistory = (double) historyRate.get(currencyHistory);
                 for (Object currencyLatest : latestRate.keySet()) {
-                    courseLatest = (double) latestRate.get(currencyLatest);
-                    if (courseLatest > courseHistory) {
-//                        model.addAttribute();
-                        System.out.println(base + " по отношению к " + rateSelect + " вырос на " + (courseLatest - courseHistory));
-                        System.out.println(rateSelect + " на " + ratesDate + " составлял " + courseHistory);
-                        System.out.println(rateSelect + " на сегодня составляет " + courseLatest);
-                    }
-                    else if (courseLatest == courseHistory){
-//                        model.addAttribute();
-                        System.out.println(base + " по отношению к " + rateSelect + " не изменился");
+                    if ((historyRate.get(currencyHistory) instanceof Double) && (latestRate.get(currencyLatest) instanceof Double)) {
+                        courseHistory = (Double) historyRate.get(currencyHistory);
+                        courseLatest = (Double) latestRate.get(currencyLatest);
                     }
                     else {
-                        System.out.println(base + " по отношению к " + rateSelect + " снизился на " + (courseHistory - courseLatest));
-                        System.out.println(rateSelect + " на " + ratesDate + " составлял " + courseHistory);
-                        System.out.println(rateSelect + " на сегодня составляет " + courseLatest);
+                        courseHistory = (Long) historyRate.get(currencyHistory);
+                        courseLatest = (Long) latestRate.get(currencyLatest);
+                    }
+                    if (courseLatest > courseHistory) {
+                        return "redirect:/more";
+                    }
+                    else if (courseLatest <= courseHistory) {
+                        return "redirect:/less";
                     }
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,8 +98,8 @@ public class MainController {
     }
 
     public void setUrl(String baseSelect, String rateSelect, String ratesDate) {
-        ratesProperties.setBase("USD");
-        ratesProperties.setSymbol(rateSelect);
-        ratesProperties.setEndpointHistory(ratesDate);
+        //clientsProperties.setBase("USD");
+        clientsProperties.setSymbol(rateSelect);
+        clientsProperties.setEndpointHistory(ratesDate);
     }
 }

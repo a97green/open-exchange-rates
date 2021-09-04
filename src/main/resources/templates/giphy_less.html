@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title th:text="${title}"></title>
+  <link rel="stylesheet" type="text/css" href="css/vegas.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+</head>
+<body class="modal-open" style="overflow: hidden; padding-right: 0px;" data-bs-overflow="hidden" data-bs-padding-right="0px">
+
+<div class=" overlay has-vignette">
+  <div id="example" class="slider opacity-50 vegas-container" style="height: 983px;"></div>
+</div>
+
+<section class="countdown-timer">
+  <div class="container-fluid">
+    <div class="text-center">
+      <div class="modal fade show" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" style="display: block;" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <form action="/less" method="post">
+              <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel" style="color: #0c0808" th:text="${title}"></h5>
+                <button type="submit" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+              </div>
+              <div class="modal-body">
+                <iframe th:src="${embed_url}" width="465" height="360" frameborder="0" class="giphy-embed" allowfullscreen=""></iframe>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Понятно</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+<script src="js/vegas.min.js"></script>
+<script type="text/javascript">
+  $("#example").vegas({
+    timer: false,
+    delay: 3000,
+    transitionDuration: 1000,
+    transition: "blur",
+    slides: [
+      { src: "https://storage.myseldon.com/news_pict_D3/D313F34D06361B4BF9D48800B7D2FF63" },
+      { src: "https://easymoneyinfo.ru/wp-content/uploads/image002-16.jpg" },
+      { src: "https://i.ytimg.com/vi/waYwSb72Hzo/maxresdefault.jpg" },
+      { src: "https://cdn.vashgorod.ru/uploads/images/news/ee/c8/eec81171975071cfb107c5af5a0d1998.jpg" }
+    ]
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+</body>
+</html>

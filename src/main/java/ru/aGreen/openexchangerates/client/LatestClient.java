@@ -2,13 +2,12 @@ package ru.aGreen.openexchangerates.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import ru.aGreen.openexchangerates.client.configuration.LatestConfiguration;
 
-@FeignClient(name = "client", url = "NOT_USED", configuration = LatestConfiguration.class)
+@FeignClient(name = "latest", url = "Not", configuration = LatestConfiguration.class)
 public interface LatestClient {
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     ResponseEntity<String> getLatestRates();
 
 }
