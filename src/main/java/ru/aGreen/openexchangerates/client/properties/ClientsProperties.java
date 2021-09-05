@@ -27,11 +27,11 @@ public class ClientsProperties {
     }
 
     public String getLatestUrl() {
-        return  getUrl() + getEndpointLatest() + ".json" + "?app_id=" + getAppId() + "&base=" + getBase() + "&symbols=" + getSymbol();
+        return  getUrl() + getEndpointLatest() + ".json" + "?app_id=" + getAppId() + "&base=" + getBase() + "&symbols=";
     }
 
     public String getHistoryUrl() {
-        return  getUrl() + "historical/" + getEndpointHistory() + ".json" + "?app_id=" + getAppId() + "&base=" + getBase() + "&symbols=" + getSymbol();
+        return  getUrl() + "historical/" + getEndpointHistory() + ".json" + "?app_id=" + getAppId() + "&base=" + getBase() + "&symbols=";
     }
 
 

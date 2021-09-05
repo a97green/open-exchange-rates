@@ -40,9 +40,9 @@
                 day = "0" + day;
             }
             let valueDate = year + "-" + month + "-" + day;
-            let ratesDate = $('#ratesDate');
-            ratesDate.attr("value", valueDate);
-            ratesDate.attr("max", valueDate);
+            let rateDate = $('#rateDate');
+            rateDate.attr("value", valueDate);
+            rateDate.attr("max", valueDate);
         }
 
         function loadRates(){
@@ -50,9 +50,13 @@
             let values = [[${rate_values}]]
 
             for (let i = 0; i < keys.length; i++) {
-                $('#baseSelect').append('<option value="' + keys[i] + '">' + keys[i] + '(' + values[i] + ')' + '</option>');
-                $('#rateSelect').append('<option value="' + keys[i] + '">' + keys[i] + '(' + values[i] + ')' + '</option>');
+                $('#baseSelect').append('<option id="base' + i + '" value="' + keys[i] + '">' + keys[i] + '(' + values[i] + ')' + '</option>');
+                $('#rateSelect').append('<option id="rate' + i + '" value="' + keys[i] + '">' + keys[i] + '(' + values[i] + ')' + '</option>');
+                if (keys[i].toString() === "RUB") {
+                    $('#rate' + i).attr("selected", "");
+                }
             }
+
         }
 
         function loadBtn(event) {
@@ -88,10 +92,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="ratesDate" class="form-label">Выберите дату</label>
+                            <label for="rateDate" class="form-label">Выберите дату</label>
                             <div class="row">
                                 <div class="col">
-                                    <input type="date" class="form-control" name="ratesDate" id="ratesDate" min="1999-01-01" >
+                                    <input type="date" class="form-control" name="rateDate" id="rateDate" min="1999-01-01" >
                                 </div>
                             </div>
                         </div>

@@ -25,81 +25,96 @@ public class MainController {
     @Autowired
     private LatestClient latestClient;
 
-
     @GetMapping(path = "/")
     public String getRates(Model model) {
-        String ratesResponse = currenciesClient.getCurrenciesRates().getBody();
+        String currenciesResponse = currenciesClient.getCurrenciesRates().getBody();
+        JSONObject jsonDate = new JSONObject();
         try {
-            JSONParser parser = new JSONParser();
-            JSONObject jsonCurrencies = (JSONObject) parser.parse(ratesResponse);
-            List<String> rateKeys = new ArrayList<>();
-            List<String> rateValues = new ArrayList<>();
-            for (Object rate : jsonCurrencies.keySet()) {
-                rateKeys.add(rate.toString());
-            }
-            Collections.sort (rateKeys);
-            for (String rate : rateKeys) {
-                rateValues.add(jsonCurrencies.get(rate).toString());
-            }
-            model.addAttribute("rate_keys", rateKeys);
-            model.addAttribute("rate_values", rateValues);
-            model.addAttribute("title", "Курс обмена валют");
+            jsonDate = (JSONObject) new JSONParser().parse(currenciesResponse);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        List<String> rateKeys = getRateKeys(jsonDate);
+        List<String> rateValues = getRateValues(rateKeys, jsonDate);
+
+        model.addAttribute("rate_keys", rateKeys);
+        model.addAttribute("rate_values", rateValues);
+        model.addAttribute("title", "Курс обмена валют");
         return "index";
+    }
+    public List<String> getRateKeys(JSONObject jsonDate) {
+        List<String> keys = new ArrayList<>();
+        for (Object key : jsonDate.keySet()) {
+            keys.add(key.toString());
+        }
+        Collections.sort(keys);
+        return keys;
+    }
+    public List<String> getRateValues(List<String> rateKeys, JSONObject jsonDate) {
+        List<String> values = new ArrayList<>();
+        for (String value : rateKeys) {
+            values.add(jsonDate.get(value).toString());
+        }
+        return values;
     }
 
     @PostMapping(path = "/")
     public String getRatesOther(@RequestParam String baseSelect,
                                 @RequestParam String rateSelect,
-                                @RequestParam String ratesDate,
+                                @RequestParam String rateDate,
                                 Model model) {
-        setUrl(baseSelect, rateSelect, ratesDate);
+        clientsProperties.setEndpointHistory(rateDate);
+
+        String latestRatesResponse = latestClient.getLatestRates().getBody();
+        JSONObject latestRate = (JSONObject) parseRates(latestRatesResponse).get("rates");
+        double courseLatest = courseCalc(getTypeCourse(latestRate.get(rateSelect)), getTypeCourse(latestRate.get(baseSelect)));
 
         String historyRatesResponse = historyClient.getHistoryRates().getBody();
-        String latestRatesResponse = latestClient.getLatestRates().getBody();
+        JSONObject historyRate = (JSONObject) parseRates(historyRatesResponse).get("rates");
+        double courseHistory = courseCalc(getTypeCourse(historyRate.get(rateSelect)), getTypeCourse(historyRate.get(baseSelect)));
 
-        JSONParser parser = new JSONParser();
+        System.out.println("Курс " + baseSelect + " на сегодня: " + courseLatest + " " + rateSelect);
+        System.out.println("Исторический курс " + baseSelect + " на " + rateDate + ": " + courseHistory + " " + rateSelect);
 
+        return compareCourses(courseLatest, courseHistory);
+    }
+    /*Метод получает строку ответа сервиса курсов валют. Строка в формате JSON.
+    Парсится в JSONObject и возвращается*/
+    public JSONObject parseRates(String ratesResponse) {
         try {
-            JSONObject jsonHistoryRates = (JSONObject) parser.parse(historyRatesResponse);
-            JSONObject jsonLatestRates = (JSONObject) parser.parse(latestRatesResponse);
-
-            String base = (String) jsonLatestRates.get("base");
-            JSONObject historyRate = (JSONObject) jsonHistoryRates.get("rates");
-            JSONObject latestRate = (JSONObject) jsonLatestRates.get("rates");
-
-            double courseHistory = 0;
-            double courseLatest = 0;
-
-            for (Object currencyHistory : historyRate.keySet()) {
-                for (Object currencyLatest : latestRate.keySet()) {
-                    if ((historyRate.get(currencyHistory) instanceof Double) && (latestRate.get(currencyLatest) instanceof Double)) {
-                        courseHistory = (Double) historyRate.get(currencyHistory);
-                        courseLatest = (Double) latestRate.get(currencyLatest);
-                    }
-                    else {
-                        courseHistory = (Long) historyRate.get(currencyHistory);
-                        courseLatest = (Long) latestRate.get(currencyLatest);
-                    }
-                    if (courseLatest > courseHistory) {
-                        return "redirect:/more";
-                    }
-                    else if (courseLatest <= courseHistory) {
-                        return "redirect:/less";
-                    }
-                }
-            }
-        } catch (Exception e) {
+            return (JSONObject) new JSONParser().parse(ratesResponse);
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
-        return "redirect:/";
+        return null;
     }
-
-    public void setUrl(String baseSelect, String rateSelect, String ratesDate) {
-        //clientsProperties.setBase("USD");
-        clientsProperties.setSymbol(rateSelect);
-        clientsProperties.setEndpointHistory(ratesDate);
+    /*Метод получает обект значения курса, преобразуется в double и возврашается*/
+    public double getTypeCourse(Object object) {
+        if (object instanceof Long) {
+            return (long) object;
+        }
+        else if (object instanceof Double) {
+            return (double) object;
+        }
+        return (double) object;
+    }
+    /*Метод получает значения курсов валют: базовой и обменной,
+    и переводит значение обменной относительно базовой валюты(1-AED = 32-DFE)
+    Делается потому что в используемом сервисе(openexhcnerates) на бесплатном тарифе возможно выбрать в качестве базовой валюты
+    только USD*/
+    public double courseCalc(double courseRate, double courseBase) {
+        double costUnit = (1 / courseBase);
+        return (costUnit * courseRate);
+    }
+    /*Сравнивает полученные значения курсов и в зависимости от результата возвращет страницу с падением курса,*/
+    public String compareCourses(double courseLatest, double courseHistory) {
+        if (courseLatest > courseHistory) {
+            return "redirect:/more";
+        }
+        else if (courseLatest < courseHistory) {
+            return "redirect:/less";
+        }
+        return "redirect:/";
     }
 }
