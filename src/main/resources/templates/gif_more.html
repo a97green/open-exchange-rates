@@ -22,10 +22,34 @@
             <div class="modal-content">
               <form action="/more" method="post">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="staticBackdropLabel" style="color: #0c0808" th:text="${title}"></h5>
+                  <div class="modal-title alert alert-success" id="staticBackdropLabel" style="color: #0c0808" th:text="${title}"></div>
                   <button type="submit" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
+                  <table class="table">
+                    <thead>
+                    <tr>
+                      <th scope="col">Валюта</th>
+                      <th scope="col">Дата</th>
+                      <th scope="col">Курс</th>
+                      <th scope="col">Единицы</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <th scope="row" th:text="${baseSelect}"></th>
+                      <td th:text="${rateDate}"></td>
+                      <td th:text="${courseHistory}"></td>
+                      <td th:text="${rateSelect}"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row" th:text="${baseSelect}"></th>
+                      <td>Сегодня</td>
+                      <td th:text="${courseLatest}"></td>
+                      <td th:text="${rateSelect}"></td>
+                    </tr>
+                    </tbody>
+                  </table>
                   <iframe th:src="${embed_url}" width="465" height="360" frameborder="0" class="giphy-embed" allowfullscreen=""></iframe>
                 </div>
                 <div class="modal-footer">

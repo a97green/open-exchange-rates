@@ -34,8 +34,6 @@ public class ClientsProperties {
         return  getUrl() + "historical/" + getEndpointHistory() + ".json" + "?app_id=" + getAppId() + "&base=" + getBase() + "&symbols=";
     }
 
-
-
     public String getMoreUrl() {
         return getUrlGif() + "?api_key=" + getApiKey() + "&tag=" + getTagMore() + "&rating=" + getRating();
     }
@@ -43,8 +41,6 @@ public class ClientsProperties {
     public String getLessUrl() {
         return getUrlGif() + "?api_key=" + getApiKey() + "&tag=" + getTagLess() + "&rating=" + getRating();
     }
-
-
 
     public String getUrl() {
         return url;
@@ -101,8 +97,6 @@ public class ClientsProperties {
     public void setSymbol(String symbol) {
         this.symbol = symbol;
     }
-
-
 
     public String getUrlGif() {
         return urlGif;

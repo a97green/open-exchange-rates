@@ -62,6 +62,10 @@
         function loadBtn(event) {
             $(event.target).hide();
             $('#btn_load').show();
+            setTimeout(function () {
+                $(event.target).show();
+                $('#btn_load').hide();
+            }, 3000);
         }
     </script>
 </head>

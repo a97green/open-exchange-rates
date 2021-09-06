@@ -3,12 +3,14 @@ package ru.aGreen.openexchangerates.controller;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.aGreen.openexchangerates.client.*;
 import ru.aGreen.openexchangerates.client.properties.ClientsProperties;
 
@@ -28,20 +30,17 @@ public class MainController {
     @GetMapping(path = "/")
     public String getRates(Model model) {
         String currenciesResponse = currenciesClient.getCurrenciesRates().getBody();
-        JSONObject jsonDate = new JSONObject();
-        try {
-            jsonDate = (JSONObject) new JSONParser().parse(currenciesResponse);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        List<String> rateKeys = getRateKeys(jsonDate);
-        List<String> rateValues = getRateValues(rateKeys, jsonDate);
+        JSONObject jsonCurrencies = parseRates(currenciesResponse);
+
+        List<String> rateKeys = getRateKeys(jsonCurrencies);
+        List<String> rateValues = getRateValues(rateKeys, jsonCurrencies);
 
         model.addAttribute("rate_keys", rateKeys);
         model.addAttribute("rate_values", rateValues);
         model.addAttribute("title", "Курс обмена валют");
         return "index";
     }
+
     public List<String> getRateKeys(JSONObject jsonDate) {
         List<String> keys = new ArrayList<>();
         for (Object key : jsonDate.keySet()) {
@@ -62,22 +61,24 @@ public class MainController {
     public String getRatesOther(@RequestParam String baseSelect,
                                 @RequestParam String rateSelect,
                                 @RequestParam String rateDate,
-                                Model model) {
-        clientsProperties.setEndpointHistory(rateDate);
+                                RedirectAttributes redirectAttributes) {
+        if (!baseSelect.equals(rateSelect)) {
+            clientsProperties.setEndpointHistory(rateDate);
 
-        String latestRatesResponse = latestClient.getLatestRates().getBody();
-        JSONObject latestRate = (JSONObject) parseRates(latestRatesResponse).get("rates");
-        double courseLatest = courseCalc(getTypeCourse(latestRate.get(rateSelect)), getTypeCourse(latestRate.get(baseSelect)));
+            String responseLatest = latestClient.getLatestRates().getBody();
+            JSONObject jsonLatest = (JSONObject) parseRates(responseLatest).get("rates");
+            double courseLatest = courseCalc(getTypeCourse(jsonLatest.get(rateSelect)), getTypeCourse(jsonLatest.get(baseSelect)));
 
-        String historyRatesResponse = historyClient.getHistoryRates().getBody();
-        JSONObject historyRate = (JSONObject) parseRates(historyRatesResponse).get("rates");
-        double courseHistory = courseCalc(getTypeCourse(historyRate.get(rateSelect)), getTypeCourse(historyRate.get(baseSelect)));
+            String responseHistory = historyClient.getHistoryRates().getBody();
+            JSONObject jsonHistory = (JSONObject) parseRates(responseHistory).get("rates");
+            double courseHistory = courseCalc(getTypeCourse(jsonHistory.get(rateSelect)), getTypeCourse(jsonHistory.get(baseSelect)));
 
-        System.out.println("Курс " + baseSelect + " на сегодня: " + courseLatest + " " + rateSelect);
-        System.out.println("Исторический курс " + baseSelect + " на " + rateDate + ": " + courseHistory + " " + rateSelect);
-
-        return compareCourses(courseLatest, courseHistory);
+            redirectAttributes(redirectAttributes, baseSelect, rateSelect, courseLatest, courseHistory, rateDate);
+            return compareCourses(courseLatest, courseHistory);
+        }
+        return "redirect:/";
     }
+
     /*Метод получает строку ответа сервиса курсов валют. Строка в формате JSON.
     Парсится в JSONObject и возвращается*/
     public JSONObject parseRates(String ratesResponse) {
@@ -97,7 +98,18 @@ public class MainController {
         else if (object instanceof Double) {
             return (double) object;
         }
-        return (double) object;
+        else if (object instanceof Integer) {
+            return (int) object;
+        }
+        else if (object instanceof String) {
+            try {
+                return Double.parseDouble(object.toString());
+            }
+            catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        return 0;
     }
     /*Метод получает значения курсов валют: базовой и обменной,
     и переводит значение обменной относительно базовой валюты(1-AED = 32-DFE)
@@ -105,7 +117,10 @@ public class MainController {
     только USD*/
     public double courseCalc(double courseRate, double courseBase) {
         double costUnit = (1 / courseBase);
-        return (costUnit * courseRate);
+        double result = costUnit * courseRate;
+        double scale = Math.pow(10, 3);
+        result = Math.ceil(result * scale) / scale;
+        return result;
     }
     /*Сравнивает полученные значения курсов и в зависимости от результата возвращет страницу с падением курса,*/
     public String compareCourses(double courseLatest, double courseHistory) {
@@ -116,5 +131,13 @@ public class MainController {
             return "redirect:/less";
         }
         return "redirect:/";
+    }
+    /*Отправляет значения в GifController*/
+    public void redirectAttributes(RedirectAttributes redirectAttributes, String baseSelect, String rateSelect, double courseLatest, double courseHistory, String rateDate) {
+        redirectAttributes.addFlashAttribute("baseSelect", baseSelect);
+        redirectAttributes.addFlashAttribute("rateSelect", rateSelect);
+        redirectAttributes.addFlashAttribute("courseLatest", courseLatest);
+        redirectAttributes.addFlashAttribute("courseHistory", courseHistory);
+        redirectAttributes.addFlashAttribute("rateDate", rateDate);
     }
 }
